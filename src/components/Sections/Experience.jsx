@@ -5,28 +5,25 @@ import { Form, Row, Col, Button } from "react-bootstrap";
 export const Experience = () => {
     const { experienceList } = useSelector((state) => state.experience);
     const dispatch = useDispatch();
-    const [count, setCount] = useState(experienceList.length || 1);
-    const [fieldValues, setFieldValues] = useState(experienceList.length ? experienceList : []); 
+    const [count, setCount] = useState(experienceList.length ? experienceList.length-1 : 0);
+    const [fieldValues, setFieldValues] = useState(experienceList.length ? experienceList : [{}]); 
   
-    useEffect(() => {
-      if (fieldValues.length < count) {
-        setFieldValues([...fieldValues, {}]);
-      }
-    }, [count]);
+    
   
     const onCancel = () => {
       const filtered = fieldValues.filter(
-        (item, index) => index !== count - 1 && Object.keys(item).length !== 0
+        (item, index) => index !== count && Object.keys(item).length !== 0
       );
   
       setFieldValues(filtered);
       setCount(count - 1);
     };
   
-    const handleChange = (e) => {
+    const handleChange =(index) => (e) => {
         const { name, value } = e.target;
       const newArr = [...fieldValues];
-      newArr[count-1][name] = value;
+      if(!newArr[index]) newArr.push({}) 
+      newArr[index][name] = value;
       setFieldValues(newArr);
     };
   
@@ -37,30 +34,33 @@ export const Experience = () => {
       
     };
 
-    const getValue = (name) => {
-        if(fieldValues.length){
-            return fieldValues[count-1][name];
+    const getValue = (name,i) => {
+      
+        if(fieldValues.length && i< fieldValues.length) {
+            return fieldValues[i][name];
         }
         return ""
     }
   
     const createMultiple = (num) => {
       let arr = [];
-      for (let i = 0; i < num; i++) {
+      for (let i = 0; i <= num; i++) {
         
           arr.push(
-            <Form className={"mt-2"}>
+              <>
+            <p className="mt-3">Experience #{i+1}</p>
+            <Form className={"mt-2"} key={i}>
             <Row>
               <Col>
                 <Form.Group controlId="jobTitle">
                   <Form.Label>Job Title</Form.Label>
-                  <Form.Control type="text" name="jobTitle" value={getValue("jobTitle")} onChange={handleChange}/>
+                  <Form.Control type="text" name="jobTitle" value={getValue("jobTitle",i)} onChange={handleChange(i)}/>
                 </Form.Group>
               </Col>
               <Col>
                 <Form.Group controlId="companyName">
                   <Form.Label>Company Name</Form.Label>
-                  <Form.Control type="text" name="companyName"  value={getValue("companyName")} onChange={handleChange}/>
+                  <Form.Control type="text" name="companyName"  value={getValue("companyName",i)} onChange={handleChange(i)}/>
                 </Form.Group>
               </Col>
             </Row>
@@ -68,13 +68,13 @@ export const Experience = () => {
               <Col xs={6}>
                 <Form.Group controlId="startDate">
                   <Form.Label>Start Date</Form.Label>
-                  <Form.Control type="date" name="startDate" value={getValue("startDate")} onChange={handleChange} />
+                  <Form.Control type="date" name="startDate" value={getValue("startDate",i)} onChange={handleChange(i)} />
                 </Form.Group>
               </Col>
               <Col xs={6}>
                 <Form.Group controlId="endDate">
                   <Form.Label>End Date</Form.Label>
-                  <Form.Control type="date" name="endDate" value={getValue("endDate")} onChange={handleChange}/>
+                  <Form.Control type="date" name="endDate" value={getValue("endDate",i)} onChange={handleChange(i)}/>
                 </Form.Group>
               </Col>
             </Row>
@@ -82,13 +82,13 @@ export const Experience = () => {
               <Col>
                 <Form.Group controlId="description">
                   <Form.Label>Description</Form.Label>
-                  <Form.Control as="textarea" rows={`3`}  name="description" value={getValue("description")} onChange={handleChange}/>
+                  <Form.Control as="textarea" rows={`3`}  name="description" value={getValue("description",i)} onChange={handleChange(i)}/>
                 </Form.Group>
               </Col>
             </Row>
             <Row className="justify-content-center">
               
-              {count >1 && (<Col md={`auto`}>
+              {count >=1 && i != 0 && (<Col md={`auto`}>
                 <Button variant="danger" className="mt-3" onClick={onCancel}>
                   Cancel
                 </Button>
@@ -96,6 +96,7 @@ export const Experience = () => {
               
             </Row>
           </Form>
+          </>
           );
         }
       
@@ -103,7 +104,7 @@ export const Experience = () => {
     };
   return (
     <div>
-        <p className="mt-3">Experience #{count}</p>
+        
         {createMultiple(count)}
         <Row className="justify-content-center mt-5">
           <Col xs={"auto"}>

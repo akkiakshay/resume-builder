@@ -5,14 +5,10 @@ import { Form, Row, Col, Button } from "react-bootstrap";
 export const Education = () => {
     const { educationList } = useSelector((state) => state.education);
     const dispatch = useDispatch();
-    const [count, setCount] = useState(educationList.length || 1);
-    const [fieldValues, setFieldValues] = useState(educationList.length ? educationList : []);
+    const [count, setCount] = useState(educationList.length? educationList.length-1:0);
+    const [fieldValues, setFieldValues] = useState(educationList.length ? educationList : [{}]); 
   
-    useEffect(() => {
-      if (fieldValues.length < count) {
-        setFieldValues([...fieldValues, {}]);
-      }
-    }, [count]);
+    
   
     const onCancel = () => {
       const filtered = fieldValues.filter(
@@ -23,12 +19,14 @@ export const Education = () => {
       setCount(count - 1);
     };
   
-    const handleChange = (e) => {
+    const handleChange =(index) => (e) => {
         const { name, value } = e.target;
       const newArr = [...fieldValues];
-      newArr[count-1][name] = value;
+      if(!newArr[index]) newArr.push({}) 
+      newArr[index][name] = value;
       setFieldValues(newArr);
     };
+  
   
     const onSave = () => {
         
@@ -37,24 +35,27 @@ export const Education = () => {
       
     };
 
-    const getValue = (name) => {
-        if(fieldValues.length){
-            return fieldValues[count-1][name];
+    const getValue = (name,i) => {
+      
+        if(fieldValues.length && i< fieldValues.length) {
+            return fieldValues[i][name];
         }
         return ""
     }
 
     const createMultiple = (num) => {
         let arr = [];
-        for (let i = 0; i < num; i++) {
+        for (let i = 0; i <= num; i++) {
           
             arr.push(
+                <>
+            <p className="mt-3">Education #{i+1}</p>
                 <Form className={"mt-2"}>
                 <Row>
                   <Col>
                     <Form.Group controlId="collegeName">
                       <Form.Label>College Name</Form.Label>
-                      <Form.Control type="text" name="collegeName"  value={getValue("collegeName")} onChange={handleChange} />
+                      <Form.Control type="text" name="collegeName"  value={getValue("collegeName",i)} onChange={handleChange(i)} />
                     </Form.Group>
                   </Col>
                 </Row>
@@ -65,8 +66,8 @@ export const Education = () => {
                       <Form.Control
                         type="text"
                         name="degree"
-                        value={getValue("degree")}
-                        onChange={handleChange}
+                        value={getValue("degree",i)}
+                        onChange={handleChange(i)}
                       />
                     </Form.Group>
                   </Col>
@@ -76,13 +77,13 @@ export const Education = () => {
                   <Col xs={6}>
                     <Form.Group controlId="startDate">
                       <Form.Label>Start Date</Form.Label>
-                      <Form.Control type="date" name="startDate"  value={getValue("startDate")} onChange={handleChange} />
+                      <Form.Control type="date" name="startDate"  value={getValue("startDate",i)}onChange={handleChange(i)} />
                     </Form.Group>
                   </Col>
                   <Col xs={6}>
                     <Form.Group controlId="endDate">
                       <Form.Label>End Date</Form.Label>
-                      <Form.Control type="date" name="endDate"  value={getValue("endDate")} onChange={handleChange} />
+                      <Form.Control type="date" name="endDate"  value={getValue("endDate",i)} onChange={handleChange(i)}/>
                     </Form.Group>
                   </Col>
                 </Row>
@@ -94,14 +95,14 @@ export const Education = () => {
                         as="textarea"
                         rows={`3`}
                         name="description"
-                        value={getValue("description")}
-                        onChange={handleChange}
+                        value={getValue("description",i)}
+                        onChange={handleChange(i)}
                       />
                     </Form.Group>
                   </Col>
                 </Row>
                 <Row className="justify-content-center">
-                  {count > 1 && (
+                  {count >=1 && i != 0 && (
                     <Col md={`auto`}>
                       <Button variant="danger" className="mt-3" onClick={onCancel}>
                         Delete
@@ -110,6 +111,7 @@ export const Education = () => {
                   )}
                 </Row>
               </Form>
+              </>
             );
           }
         
@@ -117,7 +119,7 @@ export const Education = () => {
       };
   return (
     <div>
-      <p className="mt-3">Education #{count}</p>
+     
       {createMultiple(count)}
         <Row className="justify-content-center mt-5">
           <Col xs={"auto"}>
